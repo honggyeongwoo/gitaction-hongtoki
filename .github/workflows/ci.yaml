@@ -15,5 +15,10 @@ jobs:
       - run: echo "내 코드 있니?"
       - run: ls
 
+      - uses: actions/checkout@v6 # 코드 가져와라
+
+      - run: echo "검증-가져온 후에"
+      - run: ls
+
 # 한마디로 깃허브야 컴퓨터하나 빌려서 운영체제는 리눅스하고
 # 그 안에서 명령어 실행해줘!
