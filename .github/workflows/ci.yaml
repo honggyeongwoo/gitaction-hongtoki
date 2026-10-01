@@ -50,60 +50,85 @@
 #       # HTML 검사
 #       - run: npx --yes html-validate --rule close-order:error index.html
 
-name: HTML 검사 후 배포
+# name: HTML 검사 후 배포
 
-# main 브랜치에 push하면 실행
+# # main 브랜치에 push하면 실행
+# on:
+#   push:
+#     branches: [main]
+
+# # 배포에 필요한 권한
+# permissions:
+#   contents: read
+#   pages: write
+#   id-token: write
+
+# # 배포 작업이 겹치지 않게 설정
+# concurrency:
+#   group: pages
+#   cancel-in-progress: false
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     environment:
+#       name: github-pages
+#       url: ${{ steps.deployment.outputs.page_url }}
+
+#     steps:
+#       # 1. 저장소 코드 가져오기
+#       - uses: actions/checkout@v6
+
+#       # 2. Node.js 준비
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: "22"
+
+#       # 3. HTML 검사: 실패하면 이후 단계는 실행 안 됨
+#       - name: HTML 검사
+#         run: npx --yes html-validate --rule close-order:error index.html
+
+#       # 4. GitHub Pages 준비
+#       - uses: actions/configure-pages@v5
+
+#       # 5. 배포할 파일만 별도 폴더에 담기
+#       - name: 배포 파일 준비
+#         run: |
+#           mkdir -p public
+#           cp index.html public/
+
+#       # 6. 배포 파일 업로드
+#       - uses: actions/upload-pages-artifact@v3
+#         with:
+#           path: public
+
+#       # 7. 사이트 배포
+#       - name: 사이트 배포
+#         id: deployment
+#         uses: actions/deploy-pages@v4
+
+#어떤 작업인지 이름달기
+name: EC2배포
+
+# 언제 실행하는지
+# main 브랜치에서 push하면 실행해!
 on:
   push:
     branches: [main]
 
-# 배포에 필요한 권한
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 배포 작업이 겹치지 않게 설정
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
+# 어떤 작업할지 알려줘!
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
-      # 1. 저장소 코드 가져오기
       - uses: actions/checkout@v6
+        # scp-action 파일전송도구! (서버 전송가능하다!)
+      - uses: appleboy/scp-action@v0.1.7
+        with: # 필요한 정보들을 저장한다
+          host: ${{ secrets.EC2_HOST }} #어디로 보낼지?
+          username: ${{ secrets.USER }} #누구로?
+          key: ${{ secrets.EC2_KEY }} #어떤 키로 접속?
+          source: index.html #어떤파일보낼래?
+          target: /var/www/html # 어디에 놓을지
 
-      # 2. Node.js 준비
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      # 3. HTML 검사: 실패하면 이후 단계는 실행 안 됨
-      - name: HTML 검사
-        run: npx --yes html-validate --rule close-order:error index.html
-
-      # 4. GitHub Pages 준비
-      - uses: actions/configure-pages@v5
-
-      # 5. 배포할 파일만 별도 폴더에 담기
-      - name: 배포 파일 준비
-        run: |
-          mkdir -p public
-          cp index.html public/
-
-      # 6. 배포 파일 업로드
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-
-      # 7. 사이트 배포
-      - name: 사이트 배포
-        id: deployment
-        uses: actions/deploy-pages@v4
