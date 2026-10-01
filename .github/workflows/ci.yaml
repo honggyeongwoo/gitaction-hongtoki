@@ -120,14 +120,14 @@ on:
 # 어떤 작업할지 알려줘!
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
         # scp-action 파일전송도구! (서버 전송가능하다!)
       - uses: appleboy/scp-action@v0.1.7
         with: # 필요한 정보들을 저장한다
           host: ${{ secrets.EC2_HOST }} #어디로 보낼지?
-          username: ${{ secrets.USER }} #누구로?
+          username: ${{ secrets.EC2_USER }} #누구로?
           key: ${{ secrets.EC2_KEY }} #어떤 키로 접속?
           source: index.html #어떤파일보낼래?
           target: /var/www/html # 어디에 놓을지
